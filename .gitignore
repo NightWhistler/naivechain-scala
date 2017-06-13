@@ -13,7 +13,6 @@
 #####
 # Build files and folders
 #####
-project/
 target/
 classes/
 out/
