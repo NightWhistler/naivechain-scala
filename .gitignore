@@ -1,0 +1,70 @@
+#####
+# Generic files
+#####
+*.so
+*.log
+*.out
+*~
+*.swp
+*.DS_Store
+*.lock
+*.bak
+
+#####
+# Build files and folders
+#####
+project/
+target/
+classes/
+out/
+bin/
+build/
+dist/
+.checkstyle
+.pmd
+
+#####
+# Eclipse files and folders
+#####
+.metadata/
+.settings/
+.cache
+.classpath
+.project
+
+#####
+# NetBeans specific files
+#####
+nbproject/
+core
+nbbuild/
+nbdist/
+nbactions.xml
+nb-build.xml
+nb-configuration.xml
+
+#####
+# IntelliJ IDEA files and folders
+#####
+.idea/
+*.iwl
+*.ips
+*.iml
+
+#####
+# Netbeans files and folders
+####
+**/nbproject/**
+**/nb-configuration.xml
+
+###
+# Node stuff
+###
+**/node_modules/**
+
+###
+# Application configuration file.
+###
+application.conf
+
+.gradle
