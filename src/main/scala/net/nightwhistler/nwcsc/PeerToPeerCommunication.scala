@@ -1,6 +1,5 @@
 package net.nightwhistler.nwcsc
 
-import com.sun.net.httpserver.Authenticator.Failure
 import com.typesafe.scalalogging.Logger
 
 import scala.util.{Failure, Success}
@@ -23,7 +22,7 @@ trait PeerToPeerCommunication {
 
   case class PeerMessage( messageType: MessageType.MessageType, blocks: Seq[Block])
 
-  def handleMessage( message: PeerMessage, reply: PeerMessage => ()) = message match {
+  def handleMessage( message: PeerMessage, reply: PeerMessage => Unit) = message match {
     case PeerMessage(MessageType.QueryLatest, _) => reply(responseLatest)
     case PeerMessage(MessageType.QueryAll, _) => reply(reponseBlockChain)
     case PeerMessage(MessageType.ResponseBlockChain, chain) => handleBlockChainResponse(chain)
