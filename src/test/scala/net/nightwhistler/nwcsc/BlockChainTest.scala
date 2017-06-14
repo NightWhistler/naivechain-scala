@@ -22,7 +22,6 @@ object BlockChainTest extends Properties("Block") {
   }
 
   property("Generated chains should always be correct") = forAll(blockChainGen) { chain =>
-    logger.debug(s"Validating chain of length ${chain.blocks.length}")
     chain.isValidChain( chain.blocks )
   }
 }
