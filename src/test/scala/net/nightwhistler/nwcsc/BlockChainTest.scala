@@ -1,9 +1,7 @@
 package net.nightwhistler.nwcsc
 
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalacheck.Properties
 import org.scalacheck.Prop.forAll
-import Arbitrary.arbitrary
+import org.scalacheck.{Gen, Properties}
 
 
 /**
@@ -11,18 +9,16 @@ import Arbitrary.arbitrary
   */
 object BlockChainTest extends Properties("Block") {
 
-  val blockChain = new BlockChain {}
-
-  val palindromeGen: Gen[Seq[Block]] = for {
+  val blockChainGen: Gen[BlockChain] = for {
     length <- Gen.choose(0, 30)
     text <- Gen.listOfN(length, Gen.alphaNumStr)
   } yield {
-    text.foldLeft( Seq(blockChain.genesisBlock) ) {
-      case (blocks, data) => blockChain.generateNextBlock(data, blocks.head) +: blocks
-    }
+    val chain = new BlockChain {}
+    text.foreach { data => chain.addBlock(chain.generateNextBlock(data)) }
+    chain
   }
 
-  property("Generated chains should always be correct") = forAll(palindromeGen) { chain =>
-    blockChain.isValidChain(chain)
+  property("Generated chains should always be correct") = forAll(blockChainGen) { chain =>
+    chain.isValidChain( chain.blocks )
   }
 }

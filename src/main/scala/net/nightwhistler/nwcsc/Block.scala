@@ -33,7 +33,8 @@ trait BlockChain {
   def calculateHash(index: Int, previousHash: String, timestamp: Long, data: String) =
     s"$index:$previousHash:$timestamp:$data".sha256.hex
 
-  def generateNextBlock( blockData: String, previousBlock: Block ) = {
+  def generateNextBlock( blockData: String ) = {
+    val previousBlock = getLatestBlock
     val nextIndex = previousBlock.index + 1
     val nextTimestamp = new Date().getTime() / 1000
     val nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData)
