@@ -6,12 +6,11 @@ import com.roundeights.hasher.Implicits._
 import com.typesafe.scalalogging.Logger
 
 import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by alex on 13-6-17.
   */
-
-
 trait BlockChain {
 
   val logger = Logger("BlockChain")
@@ -23,6 +22,15 @@ trait BlockChain {
   def addBlock( block: Block ): Unit = {
     if (isValidBlock(block, getLatestBlock)) {
       blocks = Seq(block) ++ blocks
+    }
+  }
+
+  def replaceChain( newChain: Seq[Block] ): Try[Unit] = {
+    if ( isValidChain(newChain) ) {
+      blocks = newChain
+      Success()
+    } else {
+      Failure(new IllegalArgumentException("Invalid chain provided"))
     }
   }
 
