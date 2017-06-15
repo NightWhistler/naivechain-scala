@@ -27,7 +27,7 @@ class BlockChain {
   def addBlock( data: String ): Unit = addBlock(generateNextBlock(data))
 
   def addBlock( block: Block ): Unit = {
-    if (isValidBlock(block, getLatestBlock)) {
+    if (isValidBlock(block)) {
       blocks = Seq(block) ++ blocks
     }
   }
@@ -58,18 +58,22 @@ class BlockChain {
     Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash)
   }
 
-  def isValidBlock( newBlock: Block, previousBlock: Block ): Boolean =
-    previousBlock.index +1 == newBlock.index &&
-    previousBlock.hash == newBlock.previousHash &&
-    calculateHashForBlock(newBlock) == newBlock.hash
+  def isValidBlock( newBlock: Block ): Boolean = {
+    val previousBlock = getLatestBlock
+    previousBlock.index + 1 == newBlock.index &&
+      previousBlock.hash == newBlock.previousHash &&
+      calculateHashForBlock(newBlock) == newBlock.hash
+  }
 
   def isValidChain( chain: Seq[Block] ): Boolean = {
     chain match {
       case singleBlock :: Nil if singleBlock == genesisBlock => true
-      case head :: before :: tail if isValidBlock(head, before) => isValidChain(before :: tail)
+      case head :: tail if isValidBlock(head) => isValidChain(tail)
       case _ => false
     }
   }
+
+  override def toString: String = s"$blocks"
 
 }
 
