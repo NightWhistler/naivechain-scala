@@ -64,6 +64,23 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     reply.verify(*).never()
   }
 
+  it should "replace the chain if more than 1 new block is received" in new SingleBlockTest {
+    Given("A blockchain with 3 new blocks")
+    val blockData = Seq("aap", "noot", "mies")
+    val longerChain = blockData.foldLeft(peerToPeerCommunication.blockChain) { case (chain, data) =>
+      chain.addBlock(data).getOrElse(throw new IllegalStateException("Should not happen"))
+    }
+
+    When("we receive this longer chain")
+    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, longerChain.blocks), reply)
+
+    Then("The chain should be replaced, and a broadcast should be sent")
+    assertResult( longerChain.blocks )( peerToPeerCommunication.blockChain.blocks )
+    peerToPeerCommunication.broadcastStub.verify(PeerMessage(MessageType.ResponseBlockChain, Seq(longerChain.latestBlock)))
+    reply.verify(*).never()
+
+  }
+
   it should "do nothing if the received chain is empty" in new SingleBlockTest {
     When("we receive an empty block list")
     peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, Nil), reply)

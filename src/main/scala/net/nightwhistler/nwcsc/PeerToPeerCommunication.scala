@@ -35,6 +35,8 @@ trait PeerToPeerCommunication {
       val localLatestBlock = blockChain.latestBlock
       if ( latestReceivedBlock.index > localLatestBlock.index ) {
         logger.info(s"Blockchain possibly behind. We got: ${localLatestBlock.index} peer got: ${latestReceivedBlock.index}")
+
+        //FIXME: Why is this a special case? Appending the one block is effectively the same as replacing
         if ( localLatestBlock.hash == latestReceivedBlock.previousHash ) {
           logger.info("We can append the received block to our chain.")
           blockChain.addBlock(latestReceivedBlock) match {
