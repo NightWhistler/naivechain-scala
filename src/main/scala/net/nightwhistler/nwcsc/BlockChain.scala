@@ -11,13 +11,20 @@ import scala.util.{Failure, Success, Try}
 /**
   * Created by alex on 13-6-17.
   */
-trait BlockChain {
+
+object BlockChain {
+  def apply(): BlockChain = new BlockChain()
+}
+
+class BlockChain {
 
   val logger = Logger("BlockChain")
 
   val genesisBlock = Block(0, "0", 1497359352, "Genesis block", "ccce7d8349cf9f5d9a9c8f9293756f584d02dfdb953361c5ee36809aa0f560b4")
 
   var blocks: Seq[Block] = Seq(genesisBlock)
+
+  def addBlock( data: String ): Unit = addBlock(generateNextBlock(data))
 
   def addBlock( block: Block ): Unit = {
     if (isValidBlock(block, getLatestBlock)) {

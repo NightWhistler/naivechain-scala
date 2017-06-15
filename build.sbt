@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
 //Test dependencies
 libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.13.4",
-  "org.scalatest" %% "scalatest" % "3.0.1"
+  "org.scalatest" %% "scalatest" % "3.0.1",
+  "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0"
 ).map(_ % "test" )
 
