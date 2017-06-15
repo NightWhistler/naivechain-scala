@@ -11,46 +11,54 @@ import scala.util.{Failure, Success, Try}
 /**
   * Created by alex on 13-6-17.
   */
+case class Block(index: Int, previousHash: String, timestamp: Long, data: String, hash: String)
+
+object GenesisBlock extends Block(0, "0", 1497359352, "Genesis block", "ccce7d8349cf9f5d9a9c8f9293756f584d02dfdb953361c5ee36809aa0f560b4")
 
 object BlockChain {
-  def apply(): BlockChain = new BlockChain()
-}
+  def apply(): BlockChain = new BlockChain(Seq(GenesisBlock))
 
-class BlockChain {
+  def apply(blocks: Seq[Block]): Try[BlockChain] = {
+    if ( validChain(blocks) ) Success(new BlockChain(blocks))
+    else Failure(new IllegalArgumentException("Invalid chain specified."))
+  }
 
-  val logger = Logger("BlockChain")
-
-  val genesisBlock = Block(0, "0", 1497359352, "Genesis block", "ccce7d8349cf9f5d9a9c8f9293756f584d02dfdb953361c5ee36809aa0f560b4")
-
-  var blocks: Seq[Block] = Seq(genesisBlock)
-
-  def addBlock( data: String ): Unit = addBlock(generateNextBlock(data))
-
-  def addBlock( block: Block ): Unit = {
-    if (isValidBlock(block)) {
-      blocks = Seq(block) ++ blocks
+  def validChain( chain: Seq[Block] ): Boolean = {
+    chain match {
+      case singleBlock :: Nil if singleBlock == GenesisBlock => true
+      case head :: beforeHead :: tail if validBlock(head, beforeHead) => validChain(beforeHead :: tail)
+      case _ => false
     }
   }
 
-  def replaceChain( newChain: Seq[Block] ): Try[Unit] = {
-    if ( isValidChain(newChain) ) {
-      blocks = newChain
-      Success()
-    } else {
-      Failure(new IllegalArgumentException("Invalid chain provided"))
-    }
-  }
-
-  def getFirstBlock: Block = blocks(blocks.length -1)
-  def getLatestBlock: Block = blocks.head
+  def validBlock(newBlock: Block, previousBlock: Block) =
+    previousBlock.index + 1 == newBlock.index &&
+    previousBlock.hash == newBlock.previousHash &&
+    calculateHashForBlock(newBlock) == newBlock.hash
 
   def calculateHashForBlock( block: Block ) = calculateHash(block.index, block.previousHash, block.timestamp, block.data)
 
   def calculateHash(index: Int, previousHash: String, timestamp: Long, data: String) =
     s"$index:$previousHash:$timestamp:$data".sha256.hex
+}
 
-  def generateNextBlock( blockData: String ) = {
-    val previousBlock = getLatestBlock
+class BlockChain private( val blocks: Seq[Block] ) {
+
+  import BlockChain._
+
+  val logger = Logger("BlockChain")
+
+  def addBlock( data: String ): Try[BlockChain] = addBlock(generateNextBlock(data))
+
+  def addBlock( block: Block ): Try[ BlockChain ] =
+      BlockChain( block +: blocks).transform(s => Success(s),
+        _ => Failure( new IllegalArgumentException("Invalid block added")))
+
+  def firstBlock: Block = blocks(blocks.length -1)
+  def latestBlock: Block = blocks.head
+
+  def generateNextBlock( blockData: String ): Block = {
+    val previousBlock = latestBlock
     val nextIndex = previousBlock.index + 1
     val nextTimestamp = new Date().getTime() / 1000
     val nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData)
@@ -58,25 +66,11 @@ class BlockChain {
     Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash)
   }
 
-  def isValidBlock( newBlock: Block ): Boolean = {
-    val previousBlock = getLatestBlock
-    previousBlock.index + 1 == newBlock.index &&
-      previousBlock.hash == newBlock.previousHash &&
-      calculateHashForBlock(newBlock) == newBlock.hash
-  }
-
-  def isValidChain( chain: Seq[Block] ): Boolean = {
-    chain match {
-      case singleBlock :: Nil if singleBlock == genesisBlock => true
-      case head :: tail if isValidBlock(head) => isValidChain(tail)
-      case _ => false
-    }
-  }
+  def validBlock( newBlock: Block ): Boolean = BlockChain.validBlock(newBlock, latestBlock)
 
   override def toString: String = s"$blocks"
 
 }
 
-case class Block(index: Int, previousHash: String, timestamp: Long, data: String, hash: String)
 
 

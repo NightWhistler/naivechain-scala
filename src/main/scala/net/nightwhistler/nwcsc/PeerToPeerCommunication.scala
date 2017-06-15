@@ -18,7 +18,7 @@ trait PeerToPeerCommunication {
 
   val logger = Logger("PeerToPeerCommunication")
 
-  def blockChain: BlockChain
+  var blockChain: BlockChain
 
   def broadcast( peerMessage: PeerMessage )
 
@@ -32,20 +32,26 @@ trait PeerToPeerCommunication {
   def handleBlockChainResponse( receivedBlocks: Seq[Block] ): Unit = receivedBlocks match {
     case Nil => logger.warn("Received an empty block list, discarding")
     case latestReceivedBlock :: _ =>
-      val localLatestBlock = blockChain.getLatestBlock
+      val localLatestBlock = blockChain.latestBlock
       if ( latestReceivedBlock.index > localLatestBlock.index ) {
         logger.info(s"Blockchain possibly behind. We got: ${localLatestBlock.index} peer got: ${latestReceivedBlock.index}")
         if ( localLatestBlock.hash == latestReceivedBlock.previousHash ) {
           logger.info("We can append the received block to our chain.")
-          blockChain.addBlock(latestReceivedBlock)
-          broadcast(responseLatest)
+          blockChain.addBlock(latestReceivedBlock) match {
+            case Success(newChain) =>
+              blockChain = newChain
+              broadcast(responseLatest)
+            case Failure(e) => logger.error("Refusing to add new block", e)
+          }
         } else if (receivedBlocks.length == 1) {
           logger.info("We have to query the chain from our peer")
           broadcast(PeerMessage(MessageType.QueryAll))
         } else {
           logger.info("Received blockchain is longer than the current blockchain")
-          blockChain.replaceChain(receivedBlocks) match {
-            case Success(_) => broadcast(responseLatest)
+          BlockChain(receivedBlocks) match {
+            case Success(newChain) =>
+              blockChain = newChain
+              broadcast(responseLatest)
             case Failure(s) => logger.error("Rejecting received chain.", s)
           }
         }
@@ -54,7 +60,7 @@ trait PeerToPeerCommunication {
       }
   }
 
-  def responseLatest = PeerMessage(MessageType.ResponseBlockChain, Seq(blockChain.getLatestBlock))
+  def responseLatest = PeerMessage(MessageType.ResponseBlockChain, Seq(blockChain.latestBlock))
 
   def reponseBlockChain = PeerMessage(MessageType.ResponseBlockChain, blockChain.blocks)
 

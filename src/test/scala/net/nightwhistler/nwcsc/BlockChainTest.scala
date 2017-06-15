@@ -1,8 +1,7 @@
 package net.nightwhistler.nwcsc
 
-import com.typesafe.scalalogging.Logger
-import org.scalacheck.Prop.forAll
-import org.scalacheck.{Arbitrary, Gen, Properties}
+import net.nightwhistler.nwcsc.BlockChain.validChain
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
@@ -24,7 +23,11 @@ class BlockChainTest extends FlatSpec with GeneratorDrivenPropertyChecks {
   }
 
   "Generated chains" should "always be correct" in forAll { chain: BlockChain =>
-    assert( chain.isValidChain( chain.blocks ) )
+    assert( validChain( chain.blocks ) )
+  }
+
+  "For any given chain, the first block" must "be the Genesis block" in forAll { chain: BlockChain =>
+    assertResult(GenesisBlock)(chain.firstBlock)
   }
 
   "Adding an invalid block" should "never work" in forAll { (chain: BlockChain, firstName: String, secondName: String) =>
@@ -34,12 +37,12 @@ class BlockChainTest extends FlatSpec with GeneratorDrivenPropertyChecks {
 
     val currentBlockLength = chain.blocks.length
 
-    chain.addBlock(firstNewBlock)
+    val newChain = chain.addBlock(firstNewBlock).getOrElse( throw new IllegalStateException("Should succeed"))
 
-    assert( ! chain.isValidBlock(secondNewBlock) )
-    chain.addBlock(secondNewBlock)
+    assert( ! newChain.validBlock(secondNewBlock) )
+    newChain.addBlock(secondNewBlock)
 
-    assertResult(chain.blocks.length)(currentBlockLength +1)
-    assertResult(chain.getLatestBlock)(firstNewBlock)
+    assertResult(newChain.blocks.length)(currentBlockLength +1)
+    assertResult(newChain.latestBlock)(firstNewBlock)
   }
 }
