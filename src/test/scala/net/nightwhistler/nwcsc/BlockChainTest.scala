@@ -8,7 +8,7 @@ import org.scalacheck.{Gen, Properties}
 /**
   * Created by alex on 13-6-17.
   */
-object BlockChainTest extends Properties("Block") {
+object BlockChainTest extends Properties("BlockChain") {
 
   val logger = Logger("BlockChainTest")
 
@@ -23,5 +23,23 @@ object BlockChainTest extends Properties("Block") {
 
   property("Generated chains should always be correct") = forAll(blockChainGen) { chain =>
     chain.isValidChain( chain.blocks )
+  }
+
+  property("Adding an invalid block should never work") = forAll(
+    for {
+      blockChain <- blockChainGen
+      firstName <- Gen.alphaNumStr
+      secondName <- Gen.alphaNumStr
+    } yield ((blockChain, firstName, secondName))) { case (chain, firstName, secondName) =>
+
+    val firstNewBlock = chain.generateNextBlock(firstName)
+    val secondNewBlock = chain.generateNextBlock(secondName)
+
+    val currentBlockLength = chain.blocks.length
+
+    chain.addBlock(firstNewBlock)
+    chain.addBlock(secondNewBlock)
+
+    chain.blocks.length == currentBlockLength +1 && chain.getLatestBlock == firstNewBlock
   }
 }

@@ -41,6 +41,7 @@ class BlockChain {
     }
   }
 
+  def getFirstBlock: Block = blocks(blocks.length -1)
   def getLatestBlock: Block = blocks.head
 
   def calculateHashForBlock( block: Block ) = calculateHash(block.index, block.previousHash, block.timestamp, block.data)

@@ -20,9 +20,7 @@ trait PeerToPeerCommunication {
 
   def blockChain: BlockChain
 
-
   def broadcast( peerMessage: PeerMessage )
-
 
   def handleMessage( message: PeerMessage, reply: PeerMessage => Unit): Unit = message match {
     case PeerMessage(MessageType.QueryLatest, _) => reply(responseLatest)
