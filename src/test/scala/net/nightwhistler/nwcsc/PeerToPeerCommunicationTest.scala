@@ -53,13 +53,13 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
 
     Given("and a new chain containing an extra block")
     val nextBlock = peerToPeerCommunication.blockChain.generateNextBlock("Some more data")
-    val longerChain = nextBlock +: peerToPeerCommunication.blockChain.blocks
+    val oldBlocks = peerToPeerCommunication.blockChain.blocks
 
     When("we receive a message with the longer chain")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, longerChain), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, Seq(nextBlock)), reply)
 
     Then("the new block should be added to the chain, and a broadcast should be sent")
-    assertResult( longerChain )( peerToPeerCommunication.blockChain.blocks )
+    assertResult( nextBlock +: oldBlocks )( peerToPeerCommunication.blockChain.blocks )
     peerToPeerCommunication.broadcastStub.verify(PeerMessage(MessageType.ResponseBlockChain, Seq(nextBlock)))
     reply.verify(*).never()
   }

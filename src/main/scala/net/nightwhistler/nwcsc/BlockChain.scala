@@ -51,8 +51,8 @@ class BlockChain private( val blocks: Seq[Block] ) {
   def addBlock( data: String ): Try[BlockChain] = addBlock(generateNextBlock(data))
 
   def addBlock( block: Block ): Try[ BlockChain ] =
-      BlockChain( block +: blocks).transform(s => Success(s),
-        _ => Failure( new IllegalArgumentException("Invalid block added")))
+    if ( validBlock(block) ) Success( new BlockChain(block +: blocks ))
+    else Failure( new IllegalArgumentException("Invalid block added"))
 
   def firstBlock: Block = blocks(blocks.length -1)
   def latestBlock: Block = blocks.head

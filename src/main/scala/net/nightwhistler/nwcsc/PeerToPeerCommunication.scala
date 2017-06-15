@@ -29,37 +29,37 @@ trait PeerToPeerCommunication {
     case _ => logger.error("Got an unexpected peer-message, discarding")
   }
 
-  def handleBlockChainResponse( receivedBlocks: Seq[Block] ): Unit = receivedBlocks match {
-    case Nil => logger.warn("Received an empty block list, discarding")
-    case latestReceivedBlock :: _ =>
-      val localLatestBlock = blockChain.latestBlock
-      if ( latestReceivedBlock.index > localLatestBlock.index ) {
-        logger.info(s"Blockchain possibly behind. We got: ${localLatestBlock.index} peer got: ${latestReceivedBlock.index}")
+  def handleBlockChainResponse( receivedBlocks: Seq[Block] ): Unit = {
+    val localLatestBlock = blockChain.latestBlock
+    logger.info(s"${receivedBlocks.length} blocks received.")
 
-        //FIXME: Why is this a special case? Appending the one block is effectively the same as replacing
-        if ( localLatestBlock.hash == latestReceivedBlock.previousHash ) {
-          logger.info("We can append the received block to our chain.")
-          blockChain.addBlock(latestReceivedBlock) match {
-            case Success(newChain) =>
-              blockChain = newChain
-              broadcast(responseLatest)
-            case Failure(e) => logger.error("Refusing to add new block", e)
-          }
-        } else if (receivedBlocks.length == 1) {
-          logger.info("We have to query the chain from our peer")
-          broadcast(PeerMessage(MessageType.QueryAll))
-        } else {
-          logger.info("Received blockchain is longer than the current blockchain")
-          BlockChain(receivedBlocks) match {
-            case Success(newChain) =>
-              blockChain = newChain
-              broadcast(responseLatest)
-            case Failure(s) => logger.error("Rejecting received chain.", s)
-          }
-        }
-      } else {
+    receivedBlocks match {
+      case Nil => logger.warn("Received an empty block list, discarding")
+
+      case latestReceivedBlock :: Nil if latestReceivedBlock.index <= localLatestBlock.index =>
         logger.debug("received blockchain is not longer than received blockchain. Do nothing")
-      }
+
+      case latestReceivedBlock :: Nil if latestReceivedBlock.previousHash == localLatestBlock.hash =>
+         logger.info("We can append the received block to our chain.")
+            blockChain.addBlock(latestReceivedBlock) match {
+              case Success(newChain) =>
+                blockChain = newChain
+                broadcast(responseLatest)
+              case Failure(e) => logger.error("Refusing to add new block", e)
+            }
+      case _ :: Nil =>
+            logger.info("We have to query the chain from our peer")
+            broadcast(PeerMessage(MessageType.QueryAll))
+
+      case _ =>
+            logger.info("Received blockchain is longer than the current blockchain")
+            BlockChain(receivedBlocks) match {
+              case Success(newChain) =>
+                blockChain = newChain
+                broadcast(responseLatest)
+              case Failure(s) => logger.error("Rejecting received chain.", s)
+            }
+    }
   }
 
   def responseLatest = PeerMessage(MessageType.ResponseBlockChain, Seq(blockChain.latestBlock))
