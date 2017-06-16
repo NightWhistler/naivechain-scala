@@ -5,7 +5,9 @@ import java.util.Date
 import com.roundeights.hasher.Implicits._
 import com.typesafe.scalalogging.Logger
 
+import scala.annotation.tailrec
 import scala.language.postfixOps
+import scala.util.control.TailCalls.TailRec
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -23,12 +25,11 @@ object BlockChain {
     else Failure(new IllegalArgumentException("Invalid chain specified."))
   }
 
-  def validChain( chain: Seq[Block] ): Boolean = {
-    chain match {
-      case singleBlock :: Nil if singleBlock == GenesisBlock => true
-      case head :: beforeHead :: tail if validBlock(head, beforeHead) => validChain(beforeHead :: tail)
-      case _ => false
-    }
+  @tailrec
+  def validChain( chain: Seq[Block] ): Boolean = chain match {
+    case singleBlock :: Nil if singleBlock == GenesisBlock => true
+    case head :: beforeHead :: tail if validBlock(head, beforeHead) => validChain(beforeHead :: tail)
+    case _ => false
   }
 
   def validBlock(newBlock: Block, previousBlock: Block) =
