@@ -49,7 +49,7 @@ class BlockChain private( val blocks: Seq[Block] ) {
 
   val logger = Logger("BlockChain")
 
-  def addBlock( data: String ): Try[BlockChain] = addBlock(generateNextBlock(data))
+  def addBlock( data: String ): BlockChain = new BlockChain(generateNextBlock(data) +: blocks)
 
   def addBlock( block: Block ): Try[ BlockChain ] =
     if ( validBlock(block) ) Success( new BlockChain(block +: blocks ))

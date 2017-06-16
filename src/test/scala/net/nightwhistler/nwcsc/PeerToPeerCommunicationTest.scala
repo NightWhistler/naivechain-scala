@@ -19,9 +19,7 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     Given("a basic blockchain with 1 block")
     val peerToPeerCommunication = new SimplePeerToPeerCommunication(BlockChain()) with StubbedBroadcast
     val reply = stubFunction[PeerMessage, Unit]
-    peerToPeerCommunication.blockChain = peerToPeerCommunication.blockChain.addBlock("My test data").getOrElse(
-      throw new IllegalStateException("Should succeed")
-    )
+    peerToPeerCommunication.blockChain = peerToPeerCommunication.blockChain.addBlock("My test data")
   }
 
   "An incoming PeerMessage " should "lead to a reply of the full blockchain if it contains a QueryAll request" in new SingleBlockTest {
@@ -68,7 +66,7 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     Given("A blockchain with 3 new blocks")
     val blockData = Seq("aap", "noot", "mies")
     val longerChain = blockData.foldLeft(peerToPeerCommunication.blockChain) { case (chain, data) =>
-      chain.addBlock(data).getOrElse(throw new IllegalStateException("Should not happen"))
+      chain.addBlock(data)
     }
 
     When("we receive this longer chain")
@@ -91,6 +89,40 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     Then("none of the methods should be called")
     reply.verify(*).never()
     peerToPeerCommunication.broadcastStub.verify(*).never()
+  }
+
+  it should "also do nothing if the received chain is valid but shorter than the current one" in new SingleBlockTest {
+    Given("the old blockchain and a current blockchain which is longer")
+    val oldBlockChain = peerToPeerCommunication.blockChain
+    val newBlockChain = oldBlockChain .addBlock("Some new data") .addBlock("And more")
+
+    peerToPeerCommunication.blockChain = newBlockChain
+
+    When("we receive the old blockchain")
+    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, oldBlockChain.blocks), reply)
+
+    Then("We expect the message to be discarded")
+    reply.verify(*).never()
+    peerToPeerCommunication.broadcastStub.verify(*).never()
+    assertResult(newBlockChain)(peerToPeerCommunication.blockChain)
+  }
+
+  it should "query for the full chain when we receive a single block that is further ahead in the chain" in new SingleBlockTest {
+    Given("a later version of the blockchain which is 2 blocks ahead")
+    val oldBlockChain = peerToPeerCommunication.blockChain
+    val newBlockChain = peerToPeerCommunication.blockChain
+      .addBlock("Some new data") .addBlock("And more")
+
+    When("we receive the head of this blockchain")
+    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, Seq(newBlockChain.latestBlock)), reply)
+
+    Then("expect a query for the full blockchain")
+    reply.verify(*).never()
+    peerToPeerCommunication.broadcastStub.verify(PeerMessage(MessageType.QueryAll)).once()
+
+    Then("we expect the blockchain to be unchanged")
+    assertResult(oldBlockChain)(peerToPeerCommunication.blockChain)
+
   }
 
 }

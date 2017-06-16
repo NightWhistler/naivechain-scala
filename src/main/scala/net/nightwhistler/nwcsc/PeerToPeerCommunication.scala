@@ -36,7 +36,7 @@ trait PeerToPeerCommunication {
     receivedBlocks match {
       case Nil => logger.warn("Received an empty block list, discarding")
 
-      case latestReceivedBlock :: Nil if latestReceivedBlock.index <= localLatestBlock.index =>
+      case latestReceivedBlock :: _ if latestReceivedBlock.index <= localLatestBlock.index =>
         logger.debug("received blockchain is not longer than received blockchain. Do nothing")
 
       case latestReceivedBlock :: Nil if latestReceivedBlock.previousHash == localLatestBlock.hash =>
