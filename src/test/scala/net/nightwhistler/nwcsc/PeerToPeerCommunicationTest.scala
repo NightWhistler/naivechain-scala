@@ -1,8 +1,10 @@
 package net.nightwhistler.nwcsc
 
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.MessageType.{QueryAll, ResponseBlockChain}
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.{MessageType, PeerMessage}
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.{QueryAll, ResponseBlockChain}
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.{MessageType, PeerMessage}
 import net.nightwhistler.nwcsc.blockchain.BlockChain
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.PeerMessage
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, GivenWhenThen}
 

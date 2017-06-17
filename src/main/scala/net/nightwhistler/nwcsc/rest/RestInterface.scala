@@ -8,10 +8,10 @@ import akka.http.scaladsl.unmarshalling.PredefinedFromEntityUnmarshallers
 import akka.pattern.ask
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.MessageType.QueryAll
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.PeerMessage
-import net.nightwhistler.nwcsc.actor.BlockChainActor.MineBlock
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.QueryAll
+import net.nightwhistler.nwcsc.actor.BlockChainActor.{GetPeers, MineBlock, Peers}
 import net.nightwhistler.nwcsc.blockchain.{Block, GenesisBlock}
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.PeerMessage
 import org.json4s.{DefaultFormats, Formats, native}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,6 +48,16 @@ trait RestInterface extends Json4sSupport {
           }
           complete(chain)
         }
+      }~
+    path("peers") {
+        get {
+          val peerAddresses: Future[Seq[String]] = (blockChainActor ? GetPeers).map {
+            //This is a bit of a hack, since JSON4S doesn't serialize case objects well
+            case Peers(peers) => peers.map( ref => ref.path.toStringWithoutAddress )
+          }
+          complete(peerAddresses)
+        }
       }
+
 
 }

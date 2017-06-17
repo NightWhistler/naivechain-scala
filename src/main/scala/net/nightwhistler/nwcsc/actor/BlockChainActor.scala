@@ -1,27 +1,36 @@
 package net.nightwhistler.nwcsc.actor
 
-import java.util.concurrent.TimeUnit
-
-import akka.actor.Actor
-import akka.util.Timeout
-import net.nightwhistler.nwcsc.PeerToPeerCommunication
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.MessageType.ResponseBlockChain
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.{MessageType, PeerMessage}
-import net.nightwhistler.nwcsc.actor.BlockChainActor.MineBlock
+import akka.actor.{Actor, ActorRef}
+import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
 import net.nightwhistler.nwcsc.blockchain.BlockChain
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.ResponseBlockChain
+import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.PeerMessage
 
 /**
   * Actor-based implementation of PeerToPeerCommunication
   */
 object BlockChainActor {
   case class MineBlock( data: String )
+
+  case class AddPeer( peer: ActorRef )
+
+  case class Peers( peers: Seq[ActorRef])
+
+  case object GetPeers
 }
 
 class BlockChainActor extends Actor with PeerToPeerCommunication {
 
   override var blockChain: BlockChain = BlockChain()
 
+  var peers: Seq[ActorRef] = Nil
+
   override def receive: Receive = {
+
+    case AddPeer(peer) => peers :+= peer
+
+    case GetPeers => sender() ! Peers(peers)
 
     case MineBlock(data) =>
       blockChain = blockChain.addBlock(data)
@@ -29,10 +38,10 @@ class BlockChainActor extends Actor with PeerToPeerCommunication {
 
     case p@PeerMessage(_,_) =>
       val replyTo = sender()
-      handleMessage(p) { peerReply =>
-        replyTo ! peerReply
-      }
+      handleMessage(p) { peerReply => replyTo ! peerReply }
   }
 
-  override def broadcast(peerMessage: PeerMessage): Unit = {}
+  override def broadcast(peerMessage: PeerMessage): Unit = {
+    peers.foreach( peer => peer ! peerMessage)
+  }
 }

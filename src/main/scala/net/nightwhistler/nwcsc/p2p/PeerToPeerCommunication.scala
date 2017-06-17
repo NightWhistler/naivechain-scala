@@ -1,7 +1,6 @@
-package net.nightwhistler.nwcsc
+package net.nightwhistler.nwcsc.p2p
 
 import com.typesafe.scalalogging.Logger
-import net.nightwhistler.nwcsc.PeerToPeerCommunication.MessageType.{QueryAll, QueryLatest, ResponseBlockChain}
 import net.nightwhistler.nwcsc.blockchain.{Block, BlockChain}
 
 import scala.util.{Failure, Success}
@@ -24,6 +23,7 @@ object PeerToPeerCommunication {
 trait PeerToPeerCommunication {
 
   import PeerToPeerCommunication._
+  import MessageType._
 
   val logger = Logger("PeerToPeerCommunication")
 
