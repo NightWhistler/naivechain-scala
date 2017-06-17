@@ -36,7 +36,7 @@ trait RestInterface extends Json4sSupport {
         post {
           entity(as[String]) { data =>
             blockChainActor ! MineBlock(data)
-            complete("Hallo")
+            complete("")
           }
         }
     }~
