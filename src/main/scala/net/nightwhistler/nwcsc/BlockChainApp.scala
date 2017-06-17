@@ -9,18 +9,18 @@ import net.nightwhistler.nwcsc.actor.BlockChainActor
 import net.nightwhistler.nwcsc.rest.RestInterface
 
 
-object WebServer extends App with RestInterface {
+object BlockChainApp extends App with RestInterface {
 
   implicit val system = ActorSystem("BlockChain")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val blockChainActor = system.actorOf(Props[BlockChainActor])
+  val blockChainActor = system.actorOf(Props[BlockChainActor], "blockChainActor")
 
   val config = ConfigFactory.load()
   val logger = Logger("WebServer")
 
-
+  logger.debug(s"Path for actor is ${blockChainActor.path}")
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 }

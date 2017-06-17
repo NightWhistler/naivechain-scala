@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.PredefinedFromEntityUnmarshallers
 import akka.pattern.ask
 import akka.util.Timeout
+import com.typesafe.scalalogging.Logger
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.QueryAll
 import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
@@ -21,6 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait RestInterface extends Json4sSupport {
 
   val blockChainActor: ActorRef
+  val logger: Logger
 
   implicit val serialization = native.Serialization
   implicit val stringUnmarshallers = PredefinedFromEntityUnmarshallers.stringUnmarshaller
@@ -35,6 +37,7 @@ trait RestInterface extends Json4sSupport {
    path("mineBlock") {
         post {
           entity(as[String]) { data =>
+            logger.info(s"Got request to add new block $data")
             blockChainActor ! MineBlock(data)
             complete("")
           }
@@ -57,6 +60,7 @@ trait RestInterface extends Json4sSupport {
     path("addPeer") {
         post {
           entity(as[String]) { peerAddress =>
+            logger.info(s"Got request to add new peer $peerAddress")
             blockChainActor ! AddPeer(peerAddress)
             complete(s"Added peer $peerAddress")
           }

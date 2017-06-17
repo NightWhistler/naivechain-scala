@@ -8,7 +8,7 @@ resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 enablePlugins(JavaAppPackaging)
 
-dockerExposedPorts := Seq( 9000, 5150 )
+dockerExposedPorts := Seq( 9000, 2552 )
 
 libraryDependencies ++= Seq(
   "com.roundeights" %% "hasher" % "1.2.0",
@@ -28,5 +28,5 @@ libraryDependencies ++= Seq(
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0"
 ).map(_ % "test" )
 
-mainClass := Some("net.nightwhistler.nwsc.WebServer")
+mainClass := Some("net.nightwhistler.nwsc.BlockChainApp")
 

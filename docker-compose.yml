@@ -1,0 +1,14 @@
+version: '2'
+services:
+    node1: 
+        image: nwcsc:0.1
+        ports:
+            - "9000:9000"
+        links:
+            - "node2:node2"
+            
+    node2:
+        image: nwcsc:0.1
+        ports:
+            - "9001:9000"
+
