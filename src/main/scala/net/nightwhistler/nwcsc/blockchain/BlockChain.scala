@@ -54,7 +54,7 @@ class BlockChain private( val blocks: Seq[Block] ) {
     if ( validBlock(block) ) Success( new BlockChain(block +: blocks ))
     else Failure( new IllegalArgumentException("Invalid block added"))
 
-  def firstBlock: Block = blocks(blocks.length -1)
+  def firstBlock: Block = blocks.last
   def latestBlock: Block = blocks.head
 
   def generateNextBlock( blockData: String ): Block = {
