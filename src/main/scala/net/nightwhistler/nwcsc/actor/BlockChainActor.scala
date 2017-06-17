@@ -27,7 +27,6 @@ class BlockChainActor extends Actor with PeerToPeerCommunication {
   var peers: Seq[ActorSelection] = Nil
 
   override def receive: Receive = {
-    //  val remote = context.actorFor("akka://HelloRemoteSystem@127.0.0.1:5150/user/RemoteActor")
     case AddPeer(peerAddress) => peers :+= context.actorSelection(peerAddress)
 
     case GetPeers => sender() ! Peers(peers.map(_.toSerializationFormat))
