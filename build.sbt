@@ -6,6 +6,10 @@ scalaVersion := "2.12.2"
 
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
+enablePlugins(JavaAppPackaging)
+
+dockerExposedPorts := Seq( 9000, 5150 )
+
 libraryDependencies ++= Seq(
   "com.roundeights" %% "hasher" % "1.2.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",

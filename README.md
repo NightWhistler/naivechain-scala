@@ -26,3 +26,10 @@ to measure, and then
     sbt coverageReport
 
 to generate a report.
+
+Docker
+------
+
+To build the Docker container, run
+
+    sbt docker:publishLocal
