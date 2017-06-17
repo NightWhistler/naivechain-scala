@@ -7,6 +7,8 @@ It is mostly meant as an exercise for me to get a better grasp of how blockchain
 
 It uses Akka and Akka-http. Peer to peer communication between nodes is straight akka remoting, and akka-http is used for a simple rest interface.
 
+At 286 lines it's bigger than naivechain's original 200 lines, but terseness was not a priority.
+
 Building, running, etc
 ----------------------
 
