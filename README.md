@@ -1,7 +1,7 @@
 Naivechain implementation in Scala
 ==================================
 
-This is a very loose Scala port of naivechain( https://github.com/lhartikk/naivechain ).
+This is a very loose Scala port of [naivechain]( https://github.com/lhartikk/naivechain ).
 
 It is mostly meant as an exercise for me to get a better grasp of how blockchains work, and at the same time sharpen my Scala coding and testing skills a bit.
 
