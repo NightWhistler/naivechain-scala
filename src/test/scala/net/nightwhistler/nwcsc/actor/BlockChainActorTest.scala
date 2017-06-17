@@ -1,25 +1,25 @@
 package net.nightwhistler.nwcsc.actor
 
-import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestKit}
+import akka.actor.{ActorSystem, PoisonPill, Props}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
 import net.nightwhistler.nwcsc.blockchain.GenesisBlock
 import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.ResponseBlockChain
 import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.{MessageType, PeerMessage}
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, FlatSpecLike, GivenWhenThen}
+import org.scalatest._
 
 /**
   * Created by alex on 17-6-17.
   */
 class BlockChainActorTest extends TestKit(ActorSystem("BlockChain")) with FlatSpecLike
-  with ImplicitSender with GivenWhenThen with BeforeAndAfterAll {
+  with ImplicitSender with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach {
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
 
   trait BlockChainActorTest {
-    val blockChainActor = system.actorOf(Props[BlockChainActor])
+    val blockChainActor = system.actorOf(BlockChainActor.props)
   }
 
   "A BlockChainActor " should " start with an empty set of peers" in new BlockChainActorTest {
@@ -36,11 +36,27 @@ class BlockChainActorTest extends TestKit(ActorSystem("BlockChain")) with FlatSp
   }
 
   it should "start sending broadcast to a peer after it is registered" in new BlockChainActorTest {
-    blockChainActor ! AddPeer(testActor.path.toStringWithoutAddress)
+    val probe = TestProbe()
+    blockChainActor ! AddPeer(probe.ref.path.toStringWithoutAddress)
     blockChainActor ! MineBlock("testBlock")
+
+    probe.expectMsgPF(){
+      case PeerMessage(ResponseBlockChain, Seq(block)) => assert(block.data == "testBlock")
+    }
+
     expectMsgPF() {
       case PeerMessage(ResponseBlockChain, Seq(block)) => assert(block.data == "testBlock")
     }
+  }
+
+  it should "reply with the new block when a mining request is finished" in new BlockChainActorTest {
+
+    blockChainActor ! MineBlock("testBlock")
+
+    expectMsgPF() {
+      case PeerMessage(ResponseBlockChain, Seq(block)) => assert(block.data == "testBlock")
+    }
+
   }
 
   it should "send the blockchain to anybody that requests it" in new BlockChainActorTest {
