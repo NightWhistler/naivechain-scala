@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % "3.0.1",
   "ch.qos.logback" % "logback-classic" % "1.1.7",
   "com.typesafe.akka" %% "akka-http" % "10.0.7",
+  "com.typesafe.akka" %% "akka-remote" % "2.4.18",
   "de.heikoseeberger" %% "akka-http-json4s" % "1.16.1",
   "org.json4s" %% "json4s-native" % "3.5.2"
 )

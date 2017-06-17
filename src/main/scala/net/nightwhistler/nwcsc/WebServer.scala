@@ -11,7 +11,7 @@ import net.nightwhistler.nwcsc.rest.RestInterface
 
 object WebServer extends App with RestInterface {
 
-  implicit val system = ActorSystem()
+  implicit val system = ActorSystem("BlockChain")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
@@ -19,6 +19,8 @@ object WebServer extends App with RestInterface {
 
   val config = ConfigFactory.load()
   val logger = Logger("WebServer")
+
+
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 }

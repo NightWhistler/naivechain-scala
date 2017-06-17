@@ -1,6 +1,6 @@
 package net.nightwhistler.nwcsc.actor
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, ActorSelection}
 import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
 import net.nightwhistler.nwcsc.blockchain.BlockChain
 import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication
@@ -13,9 +13,9 @@ import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.PeerMessage
 object BlockChainActor {
   case class MineBlock( data: String )
 
-  case class AddPeer( peer: ActorRef )
+  case class AddPeer( address: String )
 
-  case class Peers( peers: Seq[ActorRef])
+  case class Peers( peers: Seq[String] )
 
   case object GetPeers
 }
@@ -24,13 +24,13 @@ class BlockChainActor extends Actor with PeerToPeerCommunication {
 
   override var blockChain: BlockChain = BlockChain()
 
-  var peers: Seq[ActorRef] = Nil
+  var peers: Seq[ActorSelection] = Nil
 
   override def receive: Receive = {
+    //  val remote = context.actorFor("akka://HelloRemoteSystem@127.0.0.1:5150/user/RemoteActor")
+    case AddPeer(peerAddress) => peers :+= context.actorSelection(peerAddress)
 
-    case AddPeer(peer) => peers :+= peer
-
-    case GetPeers => sender() ! Peers(peers)
+    case GetPeers => sender() ! Peers(peers.map(_.toSerializationFormat))
 
     case MineBlock(data) =>
       blockChain = blockChain.addBlock(data)
