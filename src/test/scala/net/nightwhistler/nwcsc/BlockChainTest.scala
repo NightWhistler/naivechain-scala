@@ -1,6 +1,7 @@
 package net.nightwhistler.nwcsc
 
-import net.nightwhistler.nwcsc.BlockChain.validChain
+import net.nightwhistler.nwcsc.blockchain.{BlockChain, GenesisBlock}
+import net.nightwhistler.nwcsc.blockchain.BlockChain.validChain
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FlatSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks

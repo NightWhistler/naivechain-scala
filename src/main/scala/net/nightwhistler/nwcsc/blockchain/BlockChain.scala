@@ -1,4 +1,4 @@
-package net.nightwhistler.nwcsc
+package net.nightwhistler.nwcsc.blockchain
 
 import java.util.Date
 
@@ -7,7 +7,6 @@ import com.typesafe.scalalogging.Logger
 
 import scala.annotation.tailrec
 import scala.language.postfixOps
-import scala.util.control.TailCalls.TailRec
 import scala.util.{Failure, Success, Try}
 
 /**

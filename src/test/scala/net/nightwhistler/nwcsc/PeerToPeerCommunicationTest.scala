@@ -1,7 +1,10 @@
 package net.nightwhistler.nwcsc
 
+import net.nightwhistler.nwcsc.PeerToPeerCommunication.MessageType.{QueryAll, ResponseBlockChain}
+import net.nightwhistler.nwcsc.PeerToPeerCommunication.{MessageType, PeerMessage}
+import net.nightwhistler.nwcsc.blockchain.BlockChain
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{FlatSpec, FunSuite, GivenWhenThen, fixture}
+import org.scalatest.{FlatSpec, GivenWhenThen}
 
 /**
   * Created by alex on 15-6-17.
@@ -24,23 +27,23 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
 
   "An incoming PeerMessage " should "lead to a reply of the full blockchain if it contains a QueryAll request" in new SingleBlockTest {
     When("we query for the full chain")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.QueryAll), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(QueryAll))(reply)
 
     Then("We expect the full blockchain back")
-    reply.verify(PeerMessage(MessageType.ResponseBlockChain, peerToPeerCommunication.blockChain.blocks))
+    reply.verify(PeerMessage(ResponseBlockChain, peerToPeerCommunication.blockChain.blocks))
   }
 
   it should "yield the latest block, and nothing more for a QueryLatest request" in new SingleBlockTest {
     When("we query for a single block")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.QueryLatest), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.QueryLatest))(reply)
 
     Then("we only expect the latest block")
-    reply.verify( PeerMessage(MessageType.ResponseBlockChain, Seq(peerToPeerCommunication.blockChain.latestBlock)))
+    reply.verify( PeerMessage(ResponseBlockChain, Seq(peerToPeerCommunication.blockChain.latestBlock)))
   }
 
   it should "not cause any issues for a null request, but simply discard it" in new SingleBlockTest {
     When("we pass in a null message")
-    peerToPeerCommunication.handleMessage(null, reply)
+    peerToPeerCommunication.handleMessage(null)(reply)
 
     Then("We expect the message to be discarded")
     reply.verify(*).never()
@@ -54,11 +57,11 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     val oldBlocks = peerToPeerCommunication.blockChain.blocks
 
     When("we receive a message with the longer chain")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, Seq(nextBlock)), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(ResponseBlockChain, Seq(nextBlock)))(reply)
 
     Then("the new block should be added to the chain, and a broadcast should be sent")
     assertResult( nextBlock +: oldBlocks )( peerToPeerCommunication.blockChain.blocks )
-    peerToPeerCommunication.broadcastStub.verify(PeerMessage(MessageType.ResponseBlockChain, Seq(nextBlock)))
+    peerToPeerCommunication.broadcastStub.verify(PeerMessage(ResponseBlockChain, Seq(nextBlock)))
     reply.verify(*).never()
   }
 
@@ -70,18 +73,18 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     }
 
     When("we receive this longer chain")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, longerChain.blocks), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(ResponseBlockChain, longerChain.blocks))(reply)
 
     Then("The chain should be replaced, and a broadcast should be sent")
     assertResult( longerChain.blocks )( peerToPeerCommunication.blockChain.blocks )
-    peerToPeerCommunication.broadcastStub.verify(PeerMessage(MessageType.ResponseBlockChain, Seq(longerChain.latestBlock)))
+    peerToPeerCommunication.broadcastStub.verify(PeerMessage(ResponseBlockChain, Seq(longerChain.latestBlock)))
     reply.verify(*).never()
 
   }
 
   it should "do nothing if the received chain is empty" in new SingleBlockTest {
     When("we receive an empty block list")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, Nil), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(ResponseBlockChain, Nil))(reply)
 
     Then("the blockchain should be unchanged")
     assertResult(2)(peerToPeerCommunication.blockChain.blocks.length)
@@ -99,7 +102,7 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
     peerToPeerCommunication.blockChain = newBlockChain
 
     When("we receive the old blockchain")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, oldBlockChain.blocks), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(ResponseBlockChain, oldBlockChain.blocks))(reply)
 
     Then("We expect the message to be discarded")
     reply.verify(*).never()
@@ -114,11 +117,11 @@ class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockF
       .addBlock("Some new data") .addBlock("And more")
 
     When("we receive the head of this blockchain")
-    peerToPeerCommunication.handleMessage(PeerMessage(MessageType.ResponseBlockChain, Seq(newBlockChain.latestBlock)), reply)
+    peerToPeerCommunication.handleMessage(PeerMessage(ResponseBlockChain, Seq(newBlockChain.latestBlock)))(reply)
 
     Then("expect a query for the full blockchain")
     reply.verify(*).never()
-    peerToPeerCommunication.broadcastStub.verify(PeerMessage(MessageType.QueryAll)).once()
+    peerToPeerCommunication.broadcastStub.verify(PeerMessage(QueryAll)).once()
 
     Then("we expect the blockchain to be unchanged")
     assertResult(oldBlockChain)(peerToPeerCommunication.blockChain)

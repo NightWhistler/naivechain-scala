@@ -1,20 +1,29 @@
 package net.nightwhistler.nwcsc
 
 import com.typesafe.scalalogging.Logger
+import net.nightwhistler.nwcsc.PeerToPeerCommunication.MessageType.{QueryAll, QueryLatest, ResponseBlockChain}
+import net.nightwhistler.nwcsc.blockchain.{Block, BlockChain}
 
 import scala.util.{Failure, Success}
 
 /**
   * Created by alex on 14-6-17.
   */
-object MessageType extends Enumeration {
+
+object PeerToPeerCommunication {
+
+  object MessageType extends Enumeration {
     type MessageType = Value
     val QueryLatest, QueryAll, ResponseBlockChain = Value
+  }
+
+  case class PeerMessage(messageType: MessageType.MessageType, blocks: Seq[Block] = Nil)
+
 }
 
-case class PeerMessage( messageType: MessageType.MessageType, blocks: Seq[Block] = Nil)
-
 trait PeerToPeerCommunication {
+
+  import PeerToPeerCommunication._
 
   val logger = Logger("PeerToPeerCommunication")
 
@@ -22,10 +31,10 @@ trait PeerToPeerCommunication {
 
   def broadcast( peerMessage: PeerMessage )
 
-  def handleMessage( message: PeerMessage, reply: PeerMessage => Unit): Unit = message match {
-    case PeerMessage(MessageType.QueryLatest, _) => reply(responseLatest)
-    case PeerMessage(MessageType.QueryAll, _) => reply(reponseBlockChain)
-    case PeerMessage(MessageType.ResponseBlockChain, chain) => handleBlockChainResponse(chain)
+  def handleMessage( message: PeerMessage)(reply: PeerMessage => Unit ): Unit = message match {
+    case PeerMessage(QueryLatest, _) => reply(responseLatest)
+    case PeerMessage(QueryAll, _) => reply(reponseBlockChain)
+    case PeerMessage(ResponseBlockChain, chain) => handleBlockChainResponse(chain)
     case _ => logger.error("Got an unexpected peer-message, discarding")
   }
 
@@ -49,7 +58,7 @@ trait PeerToPeerCommunication {
             }
       case _ :: Nil =>
             logger.info("We have to query the chain from our peer")
-            broadcast(PeerMessage(MessageType.QueryAll))
+            broadcast(PeerMessage(QueryAll))
 
       case _ =>
             logger.info("Received blockchain is longer than the current blockchain")
@@ -62,9 +71,9 @@ trait PeerToPeerCommunication {
     }
   }
 
-  def responseLatest = PeerMessage(MessageType.ResponseBlockChain, Seq(blockChain.latestBlock))
+  def responseLatest = PeerMessage(ResponseBlockChain, Seq(blockChain.latestBlock))
 
-  def reponseBlockChain = PeerMessage(MessageType.ResponseBlockChain, blockChain.blocks)
+  def reponseBlockChain = PeerMessage(ResponseBlockChain, blockChain.blocks)
 
 }
 
