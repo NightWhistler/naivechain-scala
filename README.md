@@ -17,7 +17,7 @@ The app can be run using docker-compose.
 
 Start by building the docker container
 
-  sbt docker:publishLocal
+    sbt docker:publishLocal
 
 Then run
 
