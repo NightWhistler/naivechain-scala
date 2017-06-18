@@ -1,7 +1,7 @@
 package net.nightwhistler.nwcsc.actor
 
 import akka.actor.{Actor, ActorRef, ActorSelection, Props}
-import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
+import net.nightwhistler.nwcsc.actor.BlockChainActor._
 import net.nightwhistler.nwcsc.blockchain.BlockChain
 import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication
 import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.ResponseBlockChain
@@ -19,6 +19,8 @@ object BlockChainActor {
 
   case object GetPeers
 
+  case object HandShake
+
   def props: Props = Props[BlockChainActor]
 }
 
@@ -26,12 +28,34 @@ class BlockChainActor extends Actor with PeerToPeerCommunication {
 
   override var blockChain: BlockChain = BlockChain()
 
-  var peers: Seq[ActorSelection] = Nil
+  var peers: Set[ActorSelection] = Set.empty
 
   override def receive: Receive = {
-    case AddPeer(peerAddress) => peers :+= context.actorSelection(peerAddress)
+    case AddPeer(peerAddress) =>
+      val selection = context.actorSelection(peerAddress)
+      logger.debug(s"Got request to add peer ${peerAddress}")
 
-    case GetPeers => sender() ! Peers(peers.map(_.toSerializationFormat))
+      if ( ! peers.contains(selection) ) {
+        //Introduce ourselves
+        selection ! HandShake
+
+        //Ask for its friends
+        selection ! GetPeers
+
+        //Tell our existing peers
+        peers.foreach( peer => peer ! AddPeer(peerAddress))
+
+        //Add to the current list of peers
+        peers += context.actorSelection(peerAddress)
+      } else logger.debug("We already know this peer, discarding")
+
+    case Peers(peers) => peers.foreach( self ! AddPeer(_))
+
+    case HandShake =>
+      logger.debug(s"Received a handshake from ${sender().path.toStringWithoutAddress}")
+      peers += context.actorSelection(sender().path)
+
+    case GetPeers => sender() ! Peers(peers.toSeq.map(_.toSerializationFormat))
 
     case MineBlock(data) =>
       blockChain = blockChain.addBlock(data)
