@@ -31,12 +31,11 @@ trait BlockChainCommunication {
 
   def receiveBlockChainMessage: Receive = {
     case QueryLatest => sender() ! responseLatest
-    case QueryAll => sender() ! reponseBlockChain
+    case QueryAll => sender() ! responseBlockChain
 
     //FIXME: This is inefficient
     case ResponseBlock(block) => handleBlockChainResponse(Seq(block))
     case ResponseBlockChain(blockChain) => handleBlockChainResponse(blockChain.blocks)
-    case _ => logger.error("Got an unexpected peer-message, discarding")
   }
 
   def handleBlockChainResponse( receivedBlocks: Seq[Block] ): Unit = {
@@ -66,7 +65,7 @@ trait BlockChainCommunication {
             BlockChain(receivedBlocks) match {
               case Success(newChain) =>
                 blockChain = newChain
-                broadcast(responseLatest)
+                broadcast(responseBlockChain)
               case Failure(s) => logger.error("Rejecting received chain.", s)
             }
     }
@@ -74,7 +73,7 @@ trait BlockChainCommunication {
 
   def responseLatest = ResponseBlock(blockChain.latestBlock)
 
-  def reponseBlockChain = ResponseBlockChain(blockChain)
+  def responseBlockChain = ResponseBlockChain(blockChain)
 
 }
 

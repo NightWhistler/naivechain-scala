@@ -42,7 +42,7 @@ trait PeerToPeer {
         selection ! GetPeers
 
         //Tell our existing peers
-        peers.foreach( peer => peer ! AddPeer(peerAddress))
+        broadcast(AddPeer(peerAddress))
 
         //Add to the current list of peers
         peers += context.actorSelection(peerAddress)
