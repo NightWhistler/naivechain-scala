@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.{TestActor, TestKitBase, TestProbe}
 import com.typesafe.scalalogging.Logger
-import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.{QueryAll, ResponseBlock, ResponseBlockChain}
+import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.{QueryAll, QueryLatest, ResponseBlock, ResponseBlockChain}
 import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
 import net.nightwhistler.nwcsc.blockchain.{Block, BlockChain, GenesisBlock}
 import net.nightwhistler.nwcsc.p2p.PeerToPeer.{AddPeer, GetPeers, Peers}
@@ -42,6 +42,18 @@ class RestInterfaceTest extends FlatSpec with ScalatestRouteTest with TestKitBas
     }
   }
 
+  it should "return the latest block for /latestBlock" in new RestInterfaceFixture {
+    testProbe.setAutoPilot { (sender: ActorRef, msg: Any) => msg match {
+      case QueryLatest =>
+        sender ! ResponseBlock(GenesisBlock)
+        TestActor.NoAutoPilot
+      }
+    }
+    Get("/latestBlock") ~> routes ~> check {
+      responseAs[Block] shouldEqual GenesisBlock
+    }
+  }
+
   it should "retrieve all peers for /peers" in new RestInterfaceFixture {
     testProbe.setAutoPilot { (sender: ActorRef, msg: Any) => msg match {
 
@@ -61,6 +73,7 @@ class RestInterfaceTest extends FlatSpec with ScalatestRouteTest with TestKitBas
       testProbe.expectMsg(AddPeer("TestPeer"))
     }
   }
+
 
   it should "add a new block for /addBlock" in new RestInterfaceFixture {
     testProbe.setAutoPilot { (sender: ActorRef, msg: Any) => msg match {
