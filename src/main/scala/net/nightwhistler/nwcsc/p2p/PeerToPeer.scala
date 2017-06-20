@@ -2,6 +2,7 @@ package net.nightwhistler.nwcsc.p2p
 
 import akka.actor.{Actor, ActorSelection}
 import com.typesafe.scalalogging.Logger
+import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.p2p.PeerToPeer.{AddPeer, GetPeers, HandShake, Peers}
 
 /**
@@ -19,7 +20,7 @@ object PeerToPeer {
 }
 
 trait PeerToPeer {
-  this: Actor =>
+  this: CompositeActor =>
 
   val logger: Logger
   var peers: Set[ActorSelection] = Set.empty
@@ -28,7 +29,7 @@ trait PeerToPeer {
     peers.foreach( _ ! message )
   }
 
-  def receivePeerToPeer: Receive = {
+  receiver {
 
     case AddPeer(peerAddress) =>
       val selection = context.actorSelection(peerAddress)

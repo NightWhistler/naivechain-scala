@@ -3,8 +3,7 @@ package net.nightwhistler.nwcsc.p2p
 import akka.actor.{Actor, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import com.typesafe.scalalogging.Logger
-import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.ResponseBlock
-import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
+import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.p2p.PeerToPeer.{AddPeer, GetPeers, HandShake, Peers}
 import org.scalatest._
 
@@ -12,8 +11,7 @@ import org.scalatest._
   * Created by alex on 20-6-17.
   */
 
-class PeerToPeerActor extends Actor with PeerToPeer {
-  override def receive: Receive = receivePeerToPeer
+class PeerToPeerActor extends CompositeActor with PeerToPeer {
   val logger = Logger("PeerToPeerActor")
 }
 

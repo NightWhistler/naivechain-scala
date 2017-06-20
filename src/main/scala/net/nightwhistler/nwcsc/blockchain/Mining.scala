@@ -2,6 +2,7 @@ package net.nightwhistler.nwcsc.blockchain
 
 import akka.actor.Actor
 import akka.stream.stage.GraphStageLogic.StageActorRef.Receive
+import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.ResponseBlock
 import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
 import net.nightwhistler.nwcsc.p2p.PeerToPeer
@@ -14,14 +15,13 @@ object Mining {
 }
 
 trait Mining {
-  this: BlockChainCommunication with PeerToPeer with Actor =>
+  this: BlockChainCommunication with PeerToPeer with CompositeActor =>
 
-  def receiveMining: Receive = {
-        case MineBlock(data) =>
-          blockChain = blockChain.addBlock(data)
-          val peerMessage = ResponseBlock(blockChain.latestBlock)
-          broadcast(peerMessage)
-          sender() ! peerMessage
+  receiver {
+    case MineBlock(data) =>
+      blockChain = blockChain.addBlock(data)
+      val peerMessage = ResponseBlock(blockChain.latestBlock)
+      broadcast(peerMessage)
+      sender() ! peerMessage
   }
-
 }

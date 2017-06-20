@@ -2,6 +2,7 @@ package net.nightwhistler.nwcsc
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
+import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.{QueryAll, QueryLatest, ResponseBlock, ResponseBlockChain}
 import net.nightwhistler.nwcsc.blockchain.{BlockChain, BlockChainCommunication}
 import net.nightwhistler.nwcsc.p2p.PeerToPeer
@@ -12,9 +13,8 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, GivenWhenThen, Matchers}
   * Created by alex on 15-6-17.
   */
 
-class BlockChainCommunicationActor(var blockChain: BlockChain) extends Actor with BlockChainCommunication with PeerToPeer {
-  val receive = receiveBlockChainMessage orElse receivePeerToPeer
-}
+class BlockChainCommunicationActor(var blockChain: BlockChain) extends
+  CompositeActor with BlockChainCommunication with PeerToPeer
 
 class BlockChainCommunicationTest extends TestKit(ActorSystem("BlockChain")) with FlatSpecLike
   with ImplicitSender with GivenWhenThen with BeforeAndAfterAll with Matchers {

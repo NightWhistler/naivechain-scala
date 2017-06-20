@@ -1,20 +1,19 @@
 package net.nightwhistler.nwcsc.blockchain
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
-import net.nightwhistler.nwcsc.actor.BlockChainActor
+import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.ResponseBlock
 import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
 import net.nightwhistler.nwcsc.p2p.PeerToPeer
-import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, FunSuite, GivenWhenThen}
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, GivenWhenThen}
 
 /**
   * Created by alex on 20-6-17.
   */
 
-class TestMiningActor extends Actor with Mining with PeerToPeer with BlockChainCommunication {
+class TestMiningActor extends CompositeActor with Mining with PeerToPeer with BlockChainCommunication {
   var blockChain = BlockChain()
-  override def receive: Receive = receiveMining
 }
 
 class MiningTest extends TestKit(ActorSystem("BlockChain")) with FlatSpecLike

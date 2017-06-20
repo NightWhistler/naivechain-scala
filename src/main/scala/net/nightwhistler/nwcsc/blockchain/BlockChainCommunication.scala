@@ -2,6 +2,7 @@ package net.nightwhistler.nwcsc.blockchain
 
 import akka.actor.Actor
 import com.typesafe.scalalogging.Logger
+import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.p2p.PeerToPeer
 
 import scala.util.{Failure, Success}
@@ -21,7 +22,7 @@ object BlockChainCommunication {
 }
 
 trait BlockChainCommunication {
-  this: PeerToPeer with Actor =>
+  this: PeerToPeer with CompositeActor =>
 
   import BlockChainCommunication._
 
@@ -29,7 +30,7 @@ trait BlockChainCommunication {
 
   var blockChain: BlockChain
 
-  def receiveBlockChainMessage: Receive = {
+  receiver {
     case QueryLatest => sender() ! responseLatest
     case QueryAll => sender() ! responseBlockChain
 
