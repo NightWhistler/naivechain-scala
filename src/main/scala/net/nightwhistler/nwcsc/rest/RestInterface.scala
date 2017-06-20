@@ -9,10 +9,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.scalalogging.Logger
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.QueryAll
-import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
+import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.{QueryAll, ResponseBlock, ResponseBlockChain}
+import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
 import net.nightwhistler.nwcsc.blockchain.{Block, GenesisBlock}
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.PeerMessage
+import net.nightwhistler.nwcsc.p2p.PeerToPeer.{AddPeer, GetPeers, Peers}
 import org.json4s.{DefaultFormats, Formats, native}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,17 +38,17 @@ trait RestInterface extends Json4sSupport {
         post {
           entity(as[String]) { data =>
             logger.info(s"Got request to add new block $data")
-            complete((blockChainActor ? MineBlock(data)).mapTo[PeerMessage].map {
-              case PeerMessage(_, Seq(block)) => block
+            complete((blockChainActor ? MineBlock(data)).mapTo[ResponseBlock].map {
+              case ResponseBlock(block) => block
             })
           }
         }
     }~
     path("blocks") {
         get {
-          val chain: Future[Seq[Block]] = (blockChainActor ? PeerMessage(QueryAll)).map {
+          val chain: Future[Seq[Block]] = (blockChainActor ? QueryAll).map {
             //This is a bit of a hack, since JSON4S doesn't serialize case objects well
-            case PeerMessage(_, blocks) => blocks.slice(0, blocks.length -1) :+ GenesisBlock.copy()
+            case ResponseBlockChain(blockChain) => blockChain.blocks.slice(0, blockChain.blocks.length -1) :+ GenesisBlock.copy()
           }
           complete(chain)
         }

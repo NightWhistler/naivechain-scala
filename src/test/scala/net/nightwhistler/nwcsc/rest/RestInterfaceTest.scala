@@ -1,23 +1,21 @@
 package net.nightwhistler.nwcsc.rest
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.testkit.{ImplicitSender, TestActor, TestKit, TestKitBase, TestProbe}
+import akka.testkit.{TestActor, TestKitBase, TestProbe}
 import com.typesafe.scalalogging.Logger
-import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
-import net.nightwhistler.nwcsc.blockchain.{Block, GenesisBlock}
-import net.nightwhistler.nwcsc.p2p.PeerManagement.Peer
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.{MessageType, PeerMessage}
-import org.scalatest.{FlatSpec, FlatSpecLike, FunSuite, Matchers}
+import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.{QueryAll, ResponseBlock, ResponseBlockChain}
+import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
+import net.nightwhistler.nwcsc.blockchain.{Block, BlockChain, GenesisBlock}
+import net.nightwhistler.nwcsc.p2p.PeerToPeer.{AddPeer, GetPeers, Peers}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.ExecutionContext
 
 /**
   * Created by alex on 17-6-17.
   */
-import akka.http.scaladsl.server._
-import Directives._
 
 class RestInterfaceTest extends FlatSpec with ScalatestRouteTest with TestKitBase
   with Matchers {
@@ -33,8 +31,8 @@ class RestInterfaceTest extends FlatSpec with ScalatestRouteTest with TestKitBas
   "A route " should "get the blockchain from the blockchain actor for /blocks" in new RestInterfaceFixture {
 
     testProbe.setAutoPilot { (sender: ActorRef, msg: Any) => msg match {
-      case PeerMessage(MessageType.QueryAll, _) =>
-        sender ! PeerMessage(MessageType.ResponseBlockChain, Seq(GenesisBlock))
+      case QueryAll =>
+        sender ! ResponseBlockChain(BlockChain())
         TestActor.NoAutoPilot
       }
     }
@@ -67,7 +65,7 @@ class RestInterfaceTest extends FlatSpec with ScalatestRouteTest with TestKitBas
   it should "add a new block for /addBlock" in new RestInterfaceFixture {
     testProbe.setAutoPilot { (sender: ActorRef, msg: Any) => msg match {
       case MineBlock(data) =>
-        sender ! PeerMessage(MessageType.ResponseBlockChain, Seq(Block(0, "", 0, data, "")))
+        sender ! ResponseBlock(Block(0, "", 0, data, ""))
         TestActor.NoAutoPilot
       }
     }
