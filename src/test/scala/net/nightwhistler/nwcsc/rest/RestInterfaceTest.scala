@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.Logger
 import net.nightwhistler.nwcsc.actor.BlockChainActor.{AddPeer, GetPeers, MineBlock, Peers}
 import net.nightwhistler.nwcsc.blockchain.{Block, GenesisBlock}
 import net.nightwhistler.nwcsc.p2p.PeerManagement.Peer
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.{MessageType, PeerMessage}
+import net.nightwhistler.nwcsc.p2p.BlockChainCommunication.{MessageType, PeerMessage}
 import org.scalatest.{FlatSpec, FlatSpecLike, FunSuite, Matchers}
 
 import scala.concurrent.ExecutionContext

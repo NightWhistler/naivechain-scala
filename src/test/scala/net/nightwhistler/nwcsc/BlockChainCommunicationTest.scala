@@ -1,28 +1,27 @@
 package net.nightwhistler.nwcsc
 
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.{QueryAll, ResponseBlockChain}
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.{MessageType, PeerMessage}
-import net.nightwhistler.nwcsc.blockchain.BlockChain
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.PeerMessage
+import net.nightwhistler.nwcsc.p2p.BlockChainCommunication.MessageType.{QueryAll, ResponseBlockChain}
+import net.nightwhistler.nwcsc.p2p.BlockChainCommunication.{MessageType, PeerMessage}
+import net.nightwhistler.nwcsc.blockchain.{BlockChain, BlockChainCommunication}
+import net.nightwhistler.nwcsc.p2p.BlockChainCommunication.PeerMessage
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, GivenWhenThen}
 
 /**
   * Created by alex on 15-6-17.
   */
-class PeerToPeerCommunicationTest extends FlatSpec with GivenWhenThen with MockFactory {
+class BlockChainCommunicationTest extends FlatSpec with GivenWhenThen with MockFactory {
 
   trait StubbedBroadcast {
     val broadcastStub = stubFunction[PeerMessage, Unit]
     def broadcast(peerMessage: PeerMessage): Unit = broadcastStub(peerMessage)
   }
 
-  abstract class SimplePeerToPeerCommunication(var blockChain: BlockChain) extends PeerToPeerCommunication
+  abstract class SimpleBlockChainCommunication(var blockChain: BlockChain) extends BlockChainCommunication
 
   trait SingleBlockTest {
     Given("a basic blockchain with 1 block")
-    val peerToPeerCommunication = new SimplePeerToPeerCommunication(BlockChain()) with StubbedBroadcast
+    val peerToPeerCommunication = new SimpleBlockChainCommunication(BlockChain()) with StubbedBroadcast
     val reply = stubFunction[PeerMessage, Unit]
     peerToPeerCommunication.blockChain = peerToPeerCommunication.blockChain.addBlock("My test data")
   }

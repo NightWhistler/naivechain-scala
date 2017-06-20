@@ -1,7 +1,8 @@
-package net.nightwhistler.nwcsc.p2p
+package net.nightwhistler.nwcsc.blockchain
 
+import akka.actor.Actor
 import com.typesafe.scalalogging.Logger
-import net.nightwhistler.nwcsc.blockchain.{Block, BlockChain}
+import net.nightwhistler.nwcsc.p2p.PeerToPeer
 
 import scala.util.{Failure, Success}
 
@@ -9,32 +10,32 @@ import scala.util.{Failure, Success}
   * Created by alex on 14-6-17.
   */
 
-object PeerToPeerCommunication {
+object BlockChainCommunication {
 
-  object MessageType extends Enumeration {
-    type MessageType = Value
-    val QueryLatest, QueryAll, ResponseBlockChain = Value
-  }
+  case object QueryLatest
+  case object QueryAll
 
-  case class PeerMessage(messageType: MessageType.MessageType, blocks: Seq[Block] = Nil)
+  case class ResponseBlockChain(blockChain: BlockChain)
+  case class ResponseBlock(block: Block)
 
 }
 
-trait PeerToPeerCommunication {
+trait BlockChainCommunication {
+  this: PeerToPeer with Actor =>
 
-  import PeerToPeerCommunication._
-  import MessageType._
+  import BlockChainCommunication._
 
   val logger = Logger("PeerToPeerCommunication")
 
   var blockChain: BlockChain
 
-  def broadcast( peerMessage: PeerMessage )
+  def receiveBlockChainMessage: Receive = {
+    case QueryLatest => sender() ! responseLatest
+    case QueryAll => sender() ! reponseBlockChain
 
-  def handleMessage( message: PeerMessage)(reply: PeerMessage => Unit ): Unit = message match {
-    case PeerMessage(QueryLatest, _) => reply(responseLatest)
-    case PeerMessage(QueryAll, _) => reply(reponseBlockChain)
-    case PeerMessage(ResponseBlockChain, chain) => handleBlockChainResponse(chain)
+    //FIXME: This is inefficient
+    case ResponseBlock(block) => handleBlockChainResponse(Seq(block))
+    case ResponseBlockChain(blockChain) => handleBlockChainResponse(blockChain.blocks)
     case _ => logger.error("Got an unexpected peer-message, discarding")
   }
 
@@ -58,7 +59,7 @@ trait PeerToPeerCommunication {
             }
       case _ :: Nil =>
             logger.info("We have to query the chain from our peer")
-            broadcast(PeerMessage(QueryAll))
+            broadcast(QueryAll)
 
       case _ =>
             logger.info("Received blockchain is longer than the current blockchain")
@@ -71,9 +72,9 @@ trait PeerToPeerCommunication {
     }
   }
 
-  def responseLatest = PeerMessage(ResponseBlockChain, Seq(blockChain.latestBlock))
+  def responseLatest = ResponseBlock(blockChain.latestBlock)
 
-  def reponseBlockChain = PeerMessage(ResponseBlockChain, blockChain.blocks)
+  def reponseBlockChain = ResponseBlockChain(blockChain)
 
 }
 

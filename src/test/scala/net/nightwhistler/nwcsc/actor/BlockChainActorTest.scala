@@ -4,8 +4,8 @@ import akka.actor.{ActorSystem, PoisonPill, Props}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import net.nightwhistler.nwcsc.actor.BlockChainActor._
 import net.nightwhistler.nwcsc.blockchain.GenesisBlock
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.MessageType.ResponseBlockChain
-import net.nightwhistler.nwcsc.p2p.PeerToPeerCommunication.{MessageType, PeerMessage}
+import net.nightwhistler.nwcsc.p2p.BlockChainCommunication.MessageType.ResponseBlockChain
+import net.nightwhistler.nwcsc.p2p.BlockChainCommunication.{MessageType, PeerMessage}
 import org.scalatest._
 
 /**
