@@ -1,13 +1,14 @@
 Naivechain implementation in Scala
 ==================================
 
-This is a very loose Scala port of [naivechain]( https://github.com/lhartikk/naivechain ).
+This is a very loose Scala port of [naivechain]( https://github.com/lhartikk/naivechain ), which also takes some inspiration from [legion](https://github.com/aviaviavi/legion).
 
 It is mostly meant as an exercise for me to get a better grasp of how blockchains work, and at the same time sharpen my Scala coding and testing skills a bit.
 
 It uses Akka and Akka-http. Peer to peer communication between nodes is straight akka remoting, and akka-http is used for a simple rest interface.
 
-At 286 lines it's bigger than naivechain's original 200 lines, but terseness was not a priority.
+Nodes spin up a peer-to-peer network: connecting a node to another node will cause it to connect to all the nodes in the network.
+
 
 Building, running, etc
 ----------------------
@@ -16,7 +17,7 @@ The app can be run using docker-compose.
 
 Start by building the docker container
 
-  sbt docker:publishLocal
+    sbt docker:publishLocal
 
 Then run
 
