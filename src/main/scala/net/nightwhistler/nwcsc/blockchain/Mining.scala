@@ -14,6 +14,7 @@ object Mining {
   case class MineBlock( data: String )
 }
 
+
 trait Mining {
   this: BlockChainCommunication with PeerToPeer with CompositeActor =>
 

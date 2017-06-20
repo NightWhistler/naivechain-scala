@@ -23,22 +23,18 @@ Then run
 
     docker-compose up
 
-This will start 2 nodes.
-
-Link the first node to the second node:
-
-    curl -X POST -d "akka.tcp://BlockChain@172.18.0.2:2552/user/blockChainActor" http://localhost:9000/addPeer
-
-NOTE: The IP address should the IP of node2, check the logging output to verify.
+This will start 4 nodes, which will first connect to node1 (the seed node) and then proceed to build a P2P network.
 
 Then mine a block:
 
     curl -X POST -d "My data for the block" http://localhost:9000/mineBlock
 
-Now both nodes should show the block:
+All nodes should show the block:
 
-    curl http://localhost:9001/blocks                                                                                              <<<
     curl http://localhost:9000/blocks                                                                                              <<<
+    curl http://localhost:9001/blocks                                                                                              <<<
+    curl http://localhost:9002/blocks                                                                                              <<<
+    curl http://localhost:9003/blocks                                                                                              <<<
 
 Testing and code coverage
 -------------------------
