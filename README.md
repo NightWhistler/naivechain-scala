@@ -31,10 +31,10 @@ Then mine a block:
 
 All nodes should show the block:
 
-    curl http://localhost:9000/blocks                                                                                              <<<
-    curl http://localhost:9001/blocks                                                                                              <<<
-    curl http://localhost:9002/blocks                                                                                              <<<
-    curl http://localhost:9003/blocks                                                                                              <<<
+    curl http://localhost:9000/blocks
+    curl http://localhost:9001/blocks
+    curl http://localhost:9002/blocks
+    curl http://localhost:9003/blocks
 
 Testing and code coverage
 -------------------------
