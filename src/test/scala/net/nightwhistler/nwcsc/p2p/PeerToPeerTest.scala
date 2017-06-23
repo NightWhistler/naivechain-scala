@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import com.typesafe.scalalogging.Logger
 import net.nightwhistler.nwcsc.actor.CompositeActor
-import net.nightwhistler.nwcsc.p2p.PeerToPeer.{AddPeer, GetPeers, HandShake, Peers}
+import net.nightwhistler.nwcsc.p2p.PeerToPeer._
 import org.scalatest._
 
 /**
@@ -33,11 +33,12 @@ class PeerToPeerTest extends TestKit(ActorSystem("BlockChain")) with FlatSpecLik
   }
 
   it should "register new peers" in new WithPeerToPeerActor {
-    peerToPeerActor ! AddPeer("MyTestPeer")
+    val probe = TestProbe()
+    peerToPeerActor ! ResolvedPeer(probe.ref)
 
     peerToPeerActor ! GetPeers
     expectMsgPF() {
-      case Peers(Seq(address)) => assert(address.endsWith("MyTestPeer"))
+      case Peers(Seq(address)) => address shouldEqual(probe.ref.path.toSerializationFormat)
     }
   }
 
@@ -61,7 +62,7 @@ class PeerToPeerTest extends TestKit(ActorSystem("BlockChain")) with FlatSpecLik
     peerProbe.expectMsg(GetPeers)
 
     When("we register 2 new peers")
-    val probes = Seq(TestProbe(), TestProbe()).map(_.ref.path.toStringWithoutAddress)
+    val probes = Seq(TestProbe(), TestProbe()).map(_.ref.path.toSerializationFormat)
     peerToPeerActor ! Peers(probes)
 
     Then("the original peer should receive a notification for each one")
