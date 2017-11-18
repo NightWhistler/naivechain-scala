@@ -47,9 +47,10 @@ trait PeerToPeer {
       context.actorSelection(peerAddress).resolveOne().map( ResolvedPeer(_) ).pipeTo(self)
 
     case ResolvedPeer(newPeerRef: ActorRef) =>
-      context.watch(newPeerRef)
 
       if ( ! peers.contains(newPeerRef) ) {
+        context.watch(newPeerRef)
+
         //Introduce ourselves
         newPeerRef ! HandShake
 
