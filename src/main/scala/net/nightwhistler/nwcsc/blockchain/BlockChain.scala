@@ -42,7 +42,7 @@ object BlockChain {
     s"$index:$previousHash:$timestamp:$data".sha256.hex
 }
 
-case class BlockChain private( val blocks: Seq[Block] ) {
+case class BlockChain private( blocks: Seq[Block] ) {
 
   import BlockChain._
 
@@ -69,6 +69,7 @@ case class BlockChain private( val blocks: Seq[Block] ) {
   def validBlock( newBlock: Block ): Boolean = BlockChain.validBlock(newBlock, latestBlock)
 
 }
+
 
 
 

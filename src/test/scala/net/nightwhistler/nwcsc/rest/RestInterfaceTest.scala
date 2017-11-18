@@ -49,6 +49,7 @@ class RestInterfaceTest extends FlatSpec with ScalatestRouteTest with TestKitBas
         TestActor.NoAutoPilot
       }
     }
+
     Get("/latestBlock") ~> routes ~> check {
       responseAs[Block] shouldEqual GenesisBlock
     }

@@ -1,6 +1,5 @@
 package net.nightwhistler.nwcsc.blockchain
 
-import akka.actor.Actor
 import com.typesafe.scalalogging.Logger
 import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.p2p.PeerToPeer

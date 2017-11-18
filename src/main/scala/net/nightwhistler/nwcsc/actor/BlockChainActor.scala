@@ -6,7 +6,7 @@ import net.nightwhistler.nwcsc.blockchain.{BlockChain, BlockChainCommunication, 
 import net.nightwhistler.nwcsc.p2p.PeerToPeer
 
 object BlockChainActor {
-  def props( blockChain: BlockChain ): Props = Props(classOf[BlockChainActor], blockChain)
+  def props( blockChain: BlockChain ): Props = Props(new BlockChainActor(blockChain))
 }
 
 class BlockChainActor( var blockChain: BlockChain ) extends CompositeActor with PeerToPeer

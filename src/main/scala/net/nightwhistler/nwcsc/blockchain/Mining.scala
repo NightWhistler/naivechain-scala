@@ -1,7 +1,5 @@
 package net.nightwhistler.nwcsc.blockchain
 
-import akka.actor.Actor
-import akka.stream.stage.GraphStageLogic.StageActorRef.Receive
 import net.nightwhistler.nwcsc.actor.CompositeActor
 import net.nightwhistler.nwcsc.blockchain.BlockChainCommunication.ResponseBlock
 import net.nightwhistler.nwcsc.blockchain.Mining.MineBlock
