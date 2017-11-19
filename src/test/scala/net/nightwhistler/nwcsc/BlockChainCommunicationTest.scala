@@ -19,6 +19,9 @@ class BlockChainCommunicationActor(var blockChain: BlockChain) extends
 class BlockChainCommunicationTest extends TestKit(ActorSystem("BlockChain")) with FlatSpecLike
   with ImplicitSender with GivenWhenThen with BeforeAndAfterAll with Matchers {
 
+  override def afterAll {
+    TestKit.shutdownActorSystem(system)
+  }
 
   trait WithTestActor {
     val blockChain = BlockChain().addBlock("My test data")
