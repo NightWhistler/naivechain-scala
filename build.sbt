@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.1.7",
   "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
   "com.typesafe.akka" %% "akka-remote" % versions.akka,
+  "com.typesafe.akka" %% "akka-slf4j" % versions.akka,
   "de.heikoseeberger" %% "akka-http-json4s" % "1.16.1",
   "org.json4s" %% "json4s-native" % "3.5.2"
 )
