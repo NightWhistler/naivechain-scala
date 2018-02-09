@@ -1,6 +1,9 @@
 Naivechain implementation in Scala
 ==================================
 
+NOTE: This is mostly here for historical reasons, see my [cynical-chain]( https://github.com/nightwhistler/cynical-chain ) project for a BlockChain implementation that implements
+Proof of Work and can actually be used as a distributed log.
+
 This is a very loose Scala port of [naivechain]( https://github.com/lhartikk/naivechain ), which also takes some inspiration from [legion](https://github.com/aviaviavi/legion).
 
 It is mostly meant as an exercise for me to get a better grasp of how blockchains work, and at the same time sharpen my Scala coding and testing skills a bit.
